@@ -20,14 +20,9 @@ class JudgementResult(BaseModel):
 	reached_captcha: bool = Field(default=False, description='True if agent encountered captcha')
 
 
-def _truncate_text(text: str, max_length: int, from_beginning: bool = False) -> str:
-	"""Truncate text to maximum length with eval system indicator."""
-	if len(text) <= max_length:
-		return text
-	if from_beginning:
-		return '...[text truncated]' + text[-max_length + 23 :]
-	else:
-		return text[: max_length - 23] + '...[text truncated]...'
+def _truncate_text(text: str, max_length: int) -> str:
+	"""Truncate text to maximum length."""
+	return text if len(text) <= max_length else text[:max_length - 20] + '...[truncated]...'
 
 
 def construct_judge_messages(

@@ -1,7 +1,11 @@
 """Main benchmark evaluation script."""
 
+import os, logging
+os.environ["BROWSER_USE_SETUP_LOGGING"] = "false"  # Must be set before importing browser_use
+logging.basicConfig(level=logging.CRITICAL)  # Suppress all logs including shutdown warnings
+
 import asyncio
-import base64, hashlib, json, os, traceback
+import base64, hashlib, json, traceback
 from datetime import datetime
 from pathlib import Path
 from cryptography.fernet import Fernet
@@ -58,9 +62,7 @@ async def run_task(task: dict, semaphore: asyncio.Semaphore) -> dict:
 
             # To swap model: replace ChatBrowserUse() with your LLM (e.g. ChatOpenAI, ChatAnthropic)
             # You can use any OpenAI API compatible model by changing base_url. You can use ollama too. See https://docs.browser-use.com/supported-models for info
-            
-            # agent = Agent(task=task["confirmed_task"], llm=ChatBrowserUse(), browser=browser)
-            agent = Agent(task="Get the name of the top post on Hacker News", llm=ChatBrowserUse(), browser=browser) # DEBUG: Mock in a short task
+            agent = Agent(task=task["confirmed_task"], llm=ChatBrowserUse(), browser=browser)
             
             agent_history = await agent.run() # Closes browser automatically after run
 
@@ -103,7 +105,7 @@ async def main():
     successful = sum(1 for r in results if r.get("score") == 1)
     runs.append({"run_start": RUN_START, "tasks_completed": len(results), "tasks_successful": successful})
     OFFICIAL_RESULTS_FILE.write_text(json.dumps(runs, indent=2))
-    
+
     print(f"Run complete: {successful}/{len(results)} tasks successful")
 
 
