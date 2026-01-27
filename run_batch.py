@@ -55,10 +55,12 @@ def main():
     parser.add_argument("--end", type=int, required=True, help="End task index (exclusive)")
     parser.add_argument("--parallel", type=int, default=3, help="Max concurrent tasks (default: 3)")
     parser.add_argument("--tracking-id", required=True, help="UUID for orchestrator matching")
+    parser.add_argument("--output", required=True, help="Output file path for results JSON")
     args = parser.parse_args()
     
     result = asyncio.run(run_batch(args.model, args.start, args.end, args.parallel, args.tracking_id))
-    print(json.dumps(result, indent=2))
+    with open(args.output, "w") as f:
+        json.dump(result, f, indent=2)
 
 
 if __name__ == "__main__":

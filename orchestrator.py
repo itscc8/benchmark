@@ -17,10 +17,10 @@ GITHUB_TOKEN = os.getenv("GITHUB_PAT")
 REPO = "browser-use/benchmark"  # owner/repo
 WORKFLOW_FILE = "eval.yaml"
 
-TOTAL_TASKS = 10
-BATCH_SIZE = 10
+TOTAL_TASKS = 1
+BATCH_SIZE = 1
 MAX_CONCURRENT_BATCHES = 10
-POLL_INTERVAL = 30  # seconds
+POLL_INTERVAL = 5  # seconds
 
 # Models to evaluate: {model_name: number_of_runs}
 RUNS = {

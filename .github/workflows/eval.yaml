@@ -57,7 +57,7 @@ jobs:
             --end ${{ inputs.end }} \
             --parallel ${{ inputs.parallel }} \
             --tracking-id "${{ inputs.tracking_id }}" \
-            > result.json
+            --output result.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
