@@ -24,7 +24,7 @@ Tasks were hand-selected for difficulty and verified to be achievable. Each task
 
 ### Task Format
 
-When decoded, the task file contains a JSON array. Each task has three fields:
+When decoded, the task file contains a JSON array. Each task has these fields:
 
 | Field | Description |
 |-------|-------------|
