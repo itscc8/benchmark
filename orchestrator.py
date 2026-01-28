@@ -6,6 +6,7 @@ import time
 import uuid
 import zipfile
 import io
+from datetime import datetime
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
@@ -34,10 +35,10 @@ API_BASE = f"https://api.github.com/repos/{REPO}"
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
 
 
-def dispatch_batch(model: str, start: int, end: int, tracking_id: str) -> bool:
+def dispatch_batch(model: str, start: int, end: int, tracking_id: str, run_start: str) -> bool:
     """Dispatch a workflow run. Returns True if successful."""
     url = f"{API_BASE}/actions/workflows/{WORKFLOW_FILE}/dispatches"
-    data = {"ref": "main", "inputs": {"model": model, "start": str(start), "end": str(end), "parallel": "3", "tracking_id": tracking_id}}
+    data = {"ref": "main", "inputs": {"model": model, "start": str(start), "end": str(end), "parallel": "3", "tracking_id": tracking_id, "run_start": run_start}}
     resp = requests.post(url, headers=HEADERS, json=data)
     return resp.status_code == 204
 
@@ -90,30 +91,30 @@ def save_result(model: str, batch_result: dict):
 
 def main():
     # Build queue of all batches to run
-    pending = []  # [(model, start, end, tracking_id, run_id)]
+    pending = []  # [(model, start, end, tracking_id, run_start)]
     for model, num_runs in RUNS.items():
         for run_idx in range(num_runs):
-            run_id = f"{model}_run{run_idx}"
+            run_start = datetime.now().strftime("%Y%m%d_%H%M%S") + f"_{run_idx}"
             for start in range(0, TOTAL_TASKS, BATCH_SIZE):
                 end = min(start + BATCH_SIZE, TOTAL_TASKS)
                 tracking_id = str(uuid.uuid4())
-                pending.append((model, start, end, tracking_id, run_id))
+                pending.append((model, start, end, tracking_id, run_start))
     
     print(f"Total batches to run: {len(pending)}")
     
-    dispatched = {}  # tracking_id -> (model, start, end, run_id)
+    dispatched = {}  # tracking_id -> (model, start, end, run_start)
     completed = set()
     
     while pending or dispatched:
         # Dispatch new batches up to limit
         while pending and len(dispatched) < MAX_CONCURRENT_BATCHES:
-            model, start, end, tracking_id, run_id = pending.pop(0)
-            if dispatch_batch(model, start, end, tracking_id):
-                dispatched[tracking_id] = (model, start, end, run_id)
-                print(f"Dispatched: {model} [{start}:{end}] tracking={tracking_id[:8]}...")
+            model, start, end, tracking_id, run_start = pending.pop(0)
+            if dispatch_batch(model, start, end, tracking_id, run_start):
+                dispatched[tracking_id] = (model, start, end, run_start)
+                print(f"Dispatched: {model} [{start}:{end}] run={run_start} tracking={tracking_id[:8]}...")
             else:
                 print(f"Failed to dispatch: {model} [{start}:{end}]")
-                pending.insert(0, (model, start, end, tracking_id, run_id))  # Retry later
+                pending.insert(0, (model, start, end, tracking_id, run_start))  # Retry later
                 break
         
         if not dispatched:
@@ -131,11 +132,11 @@ def main():
             if tracking_id in dispatched and tracking_id not in completed:
                 result = download_artifact(artifact["id"])
                 if result:
-                    model, start, end, run_id = dispatched[tracking_id]
+                    model, start, end, run_start = dispatched[tracking_id]
                     save_result(model, result)
                     completed.add(tracking_id)
                     del dispatched[tracking_id]
-                    print(f"Completed: {model} [{start}:{end}] -> {result.get('tasks_successful')}/{result.get('tasks_completed')} successful")
+                    print(f"Completed: {model} [{start}:{end}] run={run_start} -> {result.get('tasks_successful')}/{result.get('tasks_completed')} successful")
     
     print("All batches complete!")
 

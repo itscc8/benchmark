@@ -24,6 +24,10 @@ on:
         description: 'UUID for orchestrator to match results'
         required: true
         type: string
+      run_start:
+        description: 'Run start timestamp for aggregation'
+        required: true
+        type: string
 
 jobs:
   run-batch:
@@ -57,6 +61,7 @@ jobs:
             --end ${{ inputs.end }} \
             --parallel ${{ inputs.parallel }} \
             --tracking-id "${{ inputs.tracking_id }}" \
+            --run-start "${{ inputs.run_start }}" \
             --output result.json
 
       - name: Upload result

@@ -5,7 +5,6 @@ import os
 import argparse
 import asyncio
 import json
-from datetime import datetime
 from dotenv import load_dotenv
 from browser_use import ChatGoogle
 from browser_use.llm import ChatBrowserUse, ChatOpenAI, ChatAnthropic
@@ -24,7 +23,7 @@ MODELS = {
 }
 
 
-async def run_batch(model_name: str, start: int, end: int, parallel: int = 3, tracking_id: str = None) -> dict:
+async def run_batch(model_name: str, start: int, end: int, parallel: int = 3, tracking_id: str = None, run_start: str = None) -> dict:
     """Run tasks[start:end] with given model. Returns results summary."""
     tasks = load_tasks()[start:end]
     llm = MODELS[model_name]()
@@ -38,7 +37,7 @@ async def run_batch(model_name: str, start: int, end: int, parallel: int = 3, tr
         "model": model_name,
         "start": start,
         "end": end,
-        "run_start": datetime.now().strftime("%Y%m%d_%H%M%S"),
+        "run_start": run_start,
         "tasks_completed": len(results),
         "tasks_successful": sum(1 for r in results if r.get("score") == 1),
         "total_steps": sum(r.get("steps", 0) for r in results),
@@ -55,10 +54,11 @@ def main():
     parser.add_argument("--end", type=int, required=True, help="End task index (exclusive)")
     parser.add_argument("--parallel", type=int, default=3, help="Max concurrent tasks (default: 3)")
     parser.add_argument("--tracking-id", required=True, help="UUID for orchestrator matching")
+    parser.add_argument("--run-start", required=True, help="Run start timestamp for aggregation")
     parser.add_argument("--output", required=True, help="Output file path for results JSON")
     args = parser.parse_args()
     
-    result = asyncio.run(run_batch(args.model, args.start, args.end, args.parallel, args.tracking_id))
+    result = asyncio.run(run_batch(args.model, args.start, args.end, args.parallel, args.tracking_id, args.run_start))
     with open(args.output, "w") as f:
         json.dump(result, f, indent=2)
 
