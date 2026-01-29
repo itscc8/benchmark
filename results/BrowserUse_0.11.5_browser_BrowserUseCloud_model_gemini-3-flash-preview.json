@@ -30,5 +30,13 @@
     "total_steps": 2308,
     "total_duration": 49215.91442513466,
     "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_0",
+    "tasks_completed": 100,
+    "tasks_successful": 64,
+    "total_steps": 2643,
+    "total_duration": 49728.88798260689,
+    "total_cost": 0.0
   }
 ]

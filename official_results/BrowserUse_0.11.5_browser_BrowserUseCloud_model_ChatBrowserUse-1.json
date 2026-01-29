@@ -22,5 +22,85 @@
     "total_steps": 2704,
     "total_duration": 27346.63125562668,
     "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_1",
+    "tasks_completed": 100,
+    "tasks_successful": 48,
+    "total_steps": 3262,
+    "total_duration": 32139.462200164795,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_0",
+    "tasks_completed": 100,
+    "tasks_successful": 44,
+    "total_steps": 3428,
+    "total_duration": 25527.337220191956,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_2",
+    "tasks_completed": 100,
+    "tasks_successful": 52,
+    "total_steps": 2761,
+    "total_duration": 22878.584916830063,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_3",
+    "tasks_completed": 100,
+    "tasks_successful": 47,
+    "total_steps": 3264,
+    "total_duration": 26653.347953557968,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_4",
+    "tasks_completed": 100,
+    "tasks_successful": 46,
+    "total_steps": 3212,
+    "total_duration": 30258.970868349075,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_0",
+    "tasks_completed": 100,
+    "tasks_successful": 46,
+    "total_steps": 2825,
+    "total_duration": 25474.91187596321,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_2",
+    "tasks_completed": 100,
+    "tasks_successful": 53,
+    "total_steps": 3207,
+    "total_duration": 22018.48361992836,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_1",
+    "tasks_completed": 100,
+    "tasks_successful": 42,
+    "total_steps": 2918,
+    "total_duration": 28511.31093096733,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_3",
+    "tasks_completed": 100,
+    "tasks_successful": 58,
+    "total_steps": 3165,
+    "total_duration": 27322.052968502045,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260129_015817_4",
+    "tasks_completed": 100,
+    "tasks_successful": 52,
+    "total_steps": 2759,
+    "total_duration": 28308.91719341278,
+    "total_cost": 0.0
   }
 ]

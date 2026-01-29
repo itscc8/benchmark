@@ -99,7 +99,11 @@ agent = Agent(task=task["confirmed_task"], llm=ChatGoogle(model="gemini-2.5-flas
 | GAIA | 20 | General AI assistant tasks (web-based) |
 | BrowseComp | 20 | Browser comprehension tasks |
 
-Tasks are base64-encoded to prevent data contamination in LLM training. Please do not publish tasks in plaintext.
+WebBench, Mind2Web 2, and BrowseComp are released under the MIT license. GAIA has no explicit license; to comply with its data policies, we only include tasks from the "fully public" validation split, and all tasks are base64 encoded and encrypted to prevent data contamination.
+
+Tasks were hand-selected for difficulty and verified to be achievable. Each task has been validated to confirm it can be completed successfully.
+
+Important: The task set is stored in base64 encoding to prevent data contamination in LLM training. Please do not publish the tasks in plaintext or use them in model training data.
 
 ### Task Format
 

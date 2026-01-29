@@ -1,0 +1,18 @@
+[
+  {
+    "run_start": "20260128_205349_1",
+    "tasks_completed": 100,
+    "tasks_successful": 39,
+    "total_steps": 1623,
+    "total_duration": 58236.52248215675,
+    "total_cost": 0.0
+  },
+  {
+    "run_start": "20260128_205349_4",
+    "tasks_completed": 100,
+    "tasks_successful": 35,
+    "total_steps": 1789,
+    "total_duration": 55297.5062289238,
+    "total_cost": 0.0
+  }
+]
