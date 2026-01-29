@@ -1,61 +1,118 @@
-# Browser Use Benchmark
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/2ccdb752-22fb-41c7-8948-857fc1ad7e24"">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/774a46d5-27a0-490c-b7d0-e65fcbbfa358">
+  <img alt="Shows a black Browser Use Logo in light color mode and a white one in dark color mode." src="https://github.com/user-attachments/assets/2ccdb752-22fb-41c7-8948-857fc1ad7e24"  width="full">
+</picture>
+
+---
+
+<div align="center">
+<a href="#demos"><img src="https://media.browser-use.tools/badges/demos" alt="Demos"></a>
+<img width="16" height="1" alt="">
+<a href="https://docs.browser-use.com"><img src="https://media.browser-use.tools/badges/docs" alt="Docs"></a>
+<img width="16" height="1" alt="">
+<a href="https://browser-use.com/posts"><img src="https://media.browser-use.tools/badges/blog" alt="Blog"></a>
+<img width="16" height="1" alt="">
+<a href="https://browsermerch.com"><img src="https://media.browser-use.tools/badges/merch" alt="Merch"></a>
+<img width="100" height="1" alt="">
+<a href="https://github.com/browser-use/browser-use"><img src="https://media.browser-use.tools/badges/github" alt="Github Stars"></a>
+<img width="4" height="1" alt="">
+<a href="https://x.com/intent/user?screen_name=browser_use"><img src="https://media.browser-use.tools/badges/twitter" alt="Twitter"></a>
+<img width="4 height="1" alt="">
+<a href="https://link.browser-use.com/discord"><img src="https://media.browser-use.tools/badges/discord" alt="Discord"></a>
+<img width="4" height="1" alt="">
+<a href="https://cloud.browser-use.com"><img src="https://media.browser-use.tools/badges/cloud" height="48" alt="Browser-Use Cloud"></a>
+</div>
+
+<h1 align="center">Open-Source Benchmarks</h1>
+</br>
+
+### **BU_Bench_V1**: 100 hand-selected tasks for evaluating browser automation agents
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="official_plots/accuracy_by_model_light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="official_plots/accuracy_by_model_dark.png">
+  <img alt="Accuracy by Model" src="official_plots/accuracy_by_model_light.png" width="100%">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="official_plots/accuracy_vs_latency_light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="official_plots/accuracy_vs_latency_dark.png">
+  <img alt="Accuracy vs Latency" src="official_plots/accuracy_vs_latency_light.png" width="100%">
+</picture>
+
+---
 
 ## Quick Start
 
-<!-- TODO -->
+**1. Install dependencies**
+```bash
+pip install uv
+uv sync
+```
+
+**2. Add API keys to `.env`**
+```bash
+BROWSER_USE_API_KEY=your-key      # Required for ChatBrowserUse and cloud browsers
+GOOGLE_API_KEY=your-key           # Required for judge LLM (gemini-2.5-flash)
+# Add other provider keys as needed (OPENAI_API_KEY, ANTHROPIC_API_KEY)
+```
+
+**3. Run evaluation**
+```bash
+uv run python run_eval.py
+```
+
+Results are saved to `results/` and detailed traces to `run_data/`.
+
+---
+
+## Swapping Models
+
+Edit `run_eval.py` to change the model:
+
+```python
+# Default: ChatBrowserUse (recommended)
+agent = Agent(task=task["confirmed_task"], llm=ChatBrowserUse(), browser=browser)
+
+# OpenAI
+agent = Agent(task=task["confirmed_task"], llm=ChatOpenAI(model="gpt-4.1"), browser=browser)
+
+# Anthropic
+agent = Agent(task=task["confirmed_task"], llm=ChatAnthropic(model="claude-sonnet-4-5"), browser=browser)
+
+# Google
+agent = Agent(task=task["confirmed_task"], llm=ChatGoogle(model="gemini-2.5-flash"), browser=browser)
+```
+
+---
 
 ## About the Benchmark
 
-The benchmark consists of 100 tasks drawn from established open-source benchmarks and custom challenges:
+100 tasks drawn from established benchmarks and custom challenges:
 
-| Source | Percentage | Description |
-|--------|------------|-------------|
-| Custom | 20% | Custom page interaction challenges |
-| WebBench | 20% | Hardest tasks from WebBench (read section) |
-| OMI2W-2 | 20% | Hardest tasks from OMI2W-2 |
-| GAIA | 20% | Hardest tasks from GAIA (web based) |
-| BrowseComp | 20% | Hardest tasks from BrowseComp |
+| Source | Tasks | Description |
+|--------|-------|-------------|
+| Custom | 20 | Page interaction challenges |
+| WebBench | 20 | Web browsing tasks |
+| Mind2Web 2 | 20 | Multi-step web navigation |
+| GAIA | 20 | General AI assistant tasks (web-based) |
+| BrowseComp | 20 | Browser comprehension tasks |
 
-WebBench, Mind2Web 2, and BrowseComp are released under the MIT license. GAIA has no explicit license; to comply with its data policies, we only include tasks from the "fully public" validation split, and all tasks are base64 encoded to prevent data contamination.
-
-Tasks were hand-selected for difficulty and verified to be achievable. Each task has been validated  to confirm it can be completed successfully.
-
-**Important:** The task set is stored in base64 encoding to prevent web scrapers from inadvertently including the tasks in LLM training data. Please do not publish the tasks in plaintext or use them in model training data.
+Tasks are base64-encoded to prevent data contamination in LLM training. Please do not publish tasks in plaintext.
 
 ### Task Format
 
-When decoded, the task file contains a JSON array. Each task has these fields:
-
 | Field | Description |
 |-------|-------------|
-| `task_id` | Unique identifier for the task |
-| `confirmed_task` | The task instruction to execute |
-| `category` | Source benchmark category |
-| `answer` | (optional) Ground truth answer if applicable |
+| `task_id` | Unique identifier |
+| `confirmed_task` | Task instruction |
+| `category` | Source benchmark |
+| `answer` | Ground truth (if applicable) |
 
-## Configuration
-
-<!-- TODO -->
-
-## Running the Benchmark
-
-<!-- TODO -->
-
-## Results
-
-<!-- TODO -->
-
-## Visualizations
-
-<!-- TODO -->
-
-## Adding a New Framework
-
-<!-- TODO -->
+---
 
 ## Attributions
-
-This benchmark includes tasks from the following open-source benchmarks:
 
 ### WebBench
 MIT License | https://webbench.ai/
@@ -89,9 +146,7 @@ MIT License | https://cdn.openai.com/pdf/5e10f4ab-d6f7-442e-9508-59515c65e35d/br
   title = {BrowseComp: A Simple Yet Challenging Benchmark for Browsing Agents},
   institution = {OpenAI},
   year = {2025},
-  month = {April},
   url = {https://cdn.openai.com/pdf/5e10f4ab-d6f7-442e-9508-59515c65e35d/browsecomp.pdf},
-  note = {arXiv:2504.12516}
 }
 ```
 
@@ -100,7 +155,7 @@ No license (public validation split only) | https://huggingface.co/datasets/gaia
 ```bibtex
 @misc{mialon2023gaia,
   title={GAIA: a benchmark for General AI Assistants}, 
-  author={Grégoire Mialon and Clémentine Fourrier and Craig Swift and Thomas Wolf and Yann LeCun and Thomas Scialom},
+  author={Gregoire Mialon and Clementine Fourrier and Craig Swift and Thomas Wolf and Yann LeCun and Thomas Scialom},
   year={2023},
   eprint={2311.12983},
   archivePrefix={arXiv},

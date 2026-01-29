@@ -163,6 +163,7 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
     
     apply_theme(ax, theme)
     fig.tight_layout()
+    ax.text(0.5, 0.95, "Success Rate", transform=ax.transAxes, ha="center", va="top", fontsize=16, color=theme.foreground)
     fig.savefig(OUTPUT_DIR / f"accuracy_by_model_{theme.name}.png", dpi=150, facecolor=theme.background)
     plt.close(fig)
 
@@ -216,6 +217,7 @@ def plot_accuracy_vs_latency(results: dict[str, list[dict]], theme: Theme):
     add_legend(ax, legend_items, theme)
     apply_theme(ax, theme)
     fig.tight_layout()
+    ax.text(0.5, 0.95, "Success vs. Latency", transform=ax.transAxes, ha="center", va="top", fontsize=16, color=theme.foreground)
     fig.savefig(OUTPUT_DIR / f"accuracy_vs_latency_{theme.name}.png", dpi=150, facecolor=theme.background)
     plt.close(fig)
 
