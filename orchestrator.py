@@ -19,8 +19,8 @@ REPO = "browser-use/benchmark"  # owner/repo
 WORKFLOW_FILE = "eval.yaml"
 
 TOTAL_TASKS = 100
-BATCH_SIZE = 10
-MAX_CONCURRENT_BATCHES = 25
+BATCH_SIZE = 1
+MAX_CONCURRENT_BATCHES = 50
 POLL_INTERVAL = 5  # seconds
 
 # Models to evaluate: {model_name: number_of_runs}
@@ -41,7 +41,7 @@ HEADERS = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.
 def dispatch_batch(model: str, start: int, end: int, tracking_id: str, run_start: str) -> bool:
     """Dispatch a workflow run. Returns True if successful."""
     url = f"{API_BASE}/actions/workflows/{WORKFLOW_FILE}/dispatches"
-    data = {"ref": "main", "inputs": {"model": model, "start": str(start), "end": str(end), "parallel": "3", "tracking_id": tracking_id, "run_start": run_start}}
+    data = {"ref": "main", "inputs": {"model": model, "start": str(start), "end": str(end), "parallel": "1", "tracking_id": tracking_id, "run_start": run_start}}
     resp = requests.post(url, headers=HEADERS, json=data, timeout=30)
     return resp.status_code == 204
 

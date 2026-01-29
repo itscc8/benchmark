@@ -25,7 +25,7 @@ TASK_TIMEOUT = 1800 # 30 minutes max per task
 # Run parameters (hardcoded for this evaluation)
 BROWSER_NAME = "BrowserUseCloud"
 AGENT_FRAMEWORK_NAME = "BrowserUse"
-AGENT_FRAMEWORK_VERSION = "0.11.4"
+AGENT_FRAMEWORK_VERSION = "0.11.5"
 MODEL_NAME = "ChatBrowserUse"
 
 # Run naming
