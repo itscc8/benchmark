@@ -36,9 +36,9 @@
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: light)" srcset="official_plots/accuracy_vs_latency_light.png">
-  <source media="(prefers-color-scheme: dark)" srcset="official_plots/accuracy_vs_latency_dark.png">
-  <img alt="Accuracy vs Latency" src="official_plots/accuracy_vs_latency_light.png" width="100%">
+  <source media="(prefers-color-scheme: light)" srcset="official_plots/accuracy_vs_throughput_light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="official_plots/accuracy_vs_throughput_dark.png">
+  <img alt="Accuracy vs Latency" src="official_plots/accuracy_vs_throughput_light.png" width="100%">
 </picture>
 
 ---

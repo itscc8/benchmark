@@ -95,8 +95,8 @@ def compute_accuracies(runs: list[dict]) -> list[float]:
     return [r["tasks_successful"] / r["tasks_completed"] for r in runs if r["tasks_completed"] > 0]
 
 
-def compute_latencies(runs: list[dict]) -> list[float]:
-    return [r["total_duration"] / r["tasks_completed"] for r in runs if r["tasks_completed"] > 0]
+def compute_tasks_per_hour(runs: list[dict]) -> list[float]:
+    return [3600 * r["tasks_completed"] / r["total_duration"] for r in runs if r["tasks_completed"] > 0 and r["total_duration"] > 0]
 
 
 def bootstrap_ci(values: list[float], n: int = N_BOOTSTRAP) -> tuple[float, float, float]:
@@ -168,21 +168,21 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
     plt.close(fig)
 
 
-def plot_accuracy_vs_latency(results: dict[str, list[dict]], theme: Theme):
+def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
     """Scatter plot with highlighted model prominent, others in unique muted colors."""
     data = []
     for model, runs in results.items():
         accs = compute_accuracies(runs)
-        lats = compute_latencies(runs)
-        if not accs or not lats:
+        tph = compute_tasks_per_hour(runs)
+        if not accs or not tph:
             continue
         acc_mean, acc_lo, acc_hi = bootstrap_ci(accs)
-        lat_mean, lat_lo, lat_hi = bootstrap_ci(lats)
+        tph_mean, tph_lo, tph_hi = bootstrap_ci(tph)
         color = get_model_color(model, theme)
         data.append({
             "model": model, "color": color,
             "acc": acc_mean * 100, "acc_lo": (acc_mean - acc_lo) * 100, "acc_hi": (acc_hi - acc_mean) * 100,
-            "lat": lat_mean, "lat_lo": lat_mean - lat_lo, "lat_hi": lat_hi - lat_mean,
+            "tph": tph_mean, "tph_lo": tph_mean - tph_lo, "tph_hi": tph_hi - tph_mean,
         })
     
     if not data:
@@ -197,28 +197,28 @@ def plot_accuracy_vs_latency(results: dict[str, list[dict]], theme: Theme):
     for d in data:
         if d["model"] == HIGHLIGHT_MODEL:
             continue
-        ax.errorbar(d["lat"], d["acc"], xerr=[[d["lat_lo"]], [d["lat_hi"]]], yerr=[[d["acc_lo"]], [d["acc_hi"]]],
+        ax.errorbar(d["tph"], d["acc"], xerr=[[d["tph_lo"]], [d["tph_hi"]]], yerr=[[d["acc_lo"]], [d["acc_hi"]]],
                     fmt="o", capsize=3, color=d["color"], ecolor=err_color, markersize=8)
         legend_items.append((d["model"], d["color"]))
     
     # Plot highlighted model last (on top)
     highlighted = next((d for d in data if d["model"] == HIGHLIGHT_MODEL), None)
     if highlighted:
-        ax.errorbar(highlighted["lat"], highlighted["acc"], 
-                    xerr=[[highlighted["lat_lo"]], [highlighted["lat_hi"]]], 
+        ax.errorbar(highlighted["tph"], highlighted["acc"], 
+                    xerr=[[highlighted["tph_lo"]], [highlighted["tph_hi"]]], 
                     yerr=[[highlighted["acc_lo"]], [highlighted["acc_hi"]]],
                     fmt="o", capsize=3, color=highlighted["color"], ecolor=err_color, markersize=10)
         legend_items.append((highlighted["model"], highlighted["color"]))
     
-    ax.set_xlabel("Avg Task Duration (s)", fontsize=10)
+    ax.set_xlabel("Tasks per Hour", fontsize=10)
     ax.set_ylabel("Score (%)", fontsize=10)
     ax.set_ylim(0, 100)
     
     add_legend(ax, legend_items, theme)
     apply_theme(ax, theme)
     fig.tight_layout()
-    ax.text(0.5, 0.95, "Success vs. Latency", transform=ax.transAxes, ha="center", va="top", fontsize=16, color=theme.foreground)
-    fig.savefig(OUTPUT_DIR / f"accuracy_vs_latency_{theme.name}.png", dpi=150, facecolor=theme.background)
+    ax.text(0.5, 0.95, "Success vs. Throughput", transform=ax.transAxes, ha="center", va="top", fontsize=16, color=theme.foreground)
+    fig.savefig(OUTPUT_DIR / f"accuracy_vs_throughput_{theme.name}.png", dpi=150, facecolor=theme.background)
     plt.close(fig)
 
 
@@ -228,7 +228,7 @@ def main():
     
     for theme in [LIGHT, DARK]:
         plot_accuracy_by_model(results, theme)
-        plot_accuracy_vs_latency(results, theme)
+        plot_accuracy_vs_throughput(results, theme)
     
     print(f"Saved plots to {OUTPUT_DIR}")
 
