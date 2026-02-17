@@ -18,7 +18,7 @@ RESULTS_DIR = Path(__file__).parent / "official_results"
 OUTPUT_DIR = Path(__file__).parent / "official_plots"
 N_BOOTSTRAP = 1000
 EXPECTED_TASKS = 100
-HIGHLIGHT_MODEL = "ChatBrowserUse-2"
+HIGHLIGHT_MODEL = "bu-2-0"
 
 
 @dataclass

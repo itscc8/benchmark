@@ -30,7 +30,7 @@ TASK_TIMEOUT = 1800 # 30 minutes max per task
 BROWSER_NAME = "BrowserUseCloud"
 AGENT_FRAMEWORK_NAME = "BrowserUse"
 AGENT_FRAMEWORK_VERSION = "0.11.5"
-MODEL_NAME = "ChatBrowserUse-2"
+MODEL_NAME = "bu-2-0"
 
 # Run naming
 RUN_START = datetime.now().strftime("%Y%m%d_%H%M%S")

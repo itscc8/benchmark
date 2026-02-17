@@ -25,8 +25,8 @@ POLL_INTERVAL = 30  # seconds
 
 # Models to evaluate: {model_name: number_of_runs}
 RUNS = {
-    "ChatBrowserUse-1": 5,
-    "ChatBrowserUse-2": 5,
+    "bu-1-0": 5,
+    "bu-2-0": 5,
     "gemini-2.5-flash": 5,
     "claude-haiku-4-5": 5,
     "claude-sonnet-4-5": 5,

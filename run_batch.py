@@ -24,8 +24,8 @@ def interleave(tasks: list) -> list:
 
 
 MODELS = {
-    "ChatBrowserUse-1": lambda: ChatBrowserUse(model="bu-1-0"),
-    "ChatBrowserUse-2": lambda: ChatBrowserUse(model="bu-2-0"),
+    "bu-1-0": lambda: ChatBrowserUse(model="bu-1-0"),
+    "bu-2-0": lambda: ChatBrowserUse(model="bu-2-0"),
 
     "gpt-5-mini": lambda: ChatOpenAI(model="gpt-5-mini", api_key=os.getenv("OPENAI_API_KEY")),
     "gpt-5.1-codex-mini": lambda: ChatOpenAI(model="gpt-5.1-codex-mini", api_key=os.getenv("OPENAI_API_KEY")),
