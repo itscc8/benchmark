@@ -1,0 +1,42 @@
+[
+  {
+    "run_start": "20260220_000438_0",
+    "tasks_completed": 100,
+    "tasks_successful": 28,
+    "total_steps": 1571,
+    "total_duration": 33842.03,
+    "total_cost": 30.95
+  },
+  {
+    "run_start": "20260220_001447_1",
+    "tasks_completed": 105,
+    "tasks_successful": 24,
+    "total_steps": 1950,
+    "total_duration": 39232.96,
+    "total_cost": 37.83
+  },
+  {
+    "run_start": "20260220_002515_2",
+    "tasks_completed": 147,
+    "tasks_successful": 24,
+    "total_steps": 3009,
+    "total_duration": 58197.31,
+    "total_cost": 59.72
+  },
+  {
+    "run_start": "20260220_003626_3",
+    "tasks_completed": 100,
+    "tasks_successful": 28,
+    "total_steps": 1519,
+    "total_duration": 30381.81,
+    "total_cost": 28.56
+  },
+  {
+    "run_start": "20260220_004703_4",
+    "tasks_completed": 100,
+    "tasks_successful": 25,
+    "total_steps": 1484,
+    "total_duration": 33068.57,
+    "total_cost": 29.84
+  }
+]
