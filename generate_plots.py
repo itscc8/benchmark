@@ -1,10 +1,10 @@
 """Generate benchmark plots from official_results data."""
 
 import json
-import colorsys
 from dataclasses import dataclass
 from pathlib import Path
 
+import matplotlib.patches as mpatches
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
@@ -18,7 +18,44 @@ RESULTS_DIR = Path(__file__).parent / "official_results"
 OUTPUT_DIR = Path(__file__).parent / "official_plots"
 N_BOOTSTRAP = 1000
 EXPECTED_TASKS = 100
-HIGHLIGHT_MODELS = {"bu-max"}
+
+MODEL_CATEGORIES: dict[str, str] = {
+    "bu-ultra": "cloud",
+    "ChatBrowserUse-2": "hybrid",
+}
+
+DISPLAY_NAMES: dict[str, str] = {
+    "bu-ultra": "Browser Use\nCloud (bu-ultra)",
+    "ChatBrowserUse-2": "OSS +\nBU LLM",
+    "gemini-3-1-pro-preview": "gemini-3-1-pro",
+}
+
+CATEGORY_LABELS: dict[str, str] = {
+    "cloud": "Cloud",
+    "hybrid": "OSS + Cloud LLM",
+    "oss": "Open Source",
+}
+
+
+def get_category(model: str) -> str:
+    return MODEL_CATEGORIES.get(model, "oss")
+
+
+def display_name(model: str) -> str:
+    return DISPLAY_NAMES.get(model, model)
+
+
+def wrap_label(label: str) -> str:
+    """Wrap long labels onto multiple lines at natural break points."""
+    if "\n" in label:
+        return label
+    parts = label.split("-")
+    if len(parts) <= 2:
+        return label
+    mid = len(parts) // 2
+    top = "-".join(parts[:mid])
+    bottom = "-".join(parts[mid:])
+    return f"{top}-\n{bottom}"
 
 
 @dataclass
@@ -28,6 +65,8 @@ class Theme:
     foreground: str
     border: str
     primary: str
+    secondary: str
+    muted: str
 
 
 LIGHT = Theme(
@@ -35,7 +74,9 @@ LIGHT = Theme(
     background="#FAFAFA",
     foreground="#1A1A1A",
     border="#E5E5E5",
-    primary="#F97316",
+    primary="#FE670C",
+    secondary="#2563EB",
+    muted="#9CA3AF",
 )
 
 DARK = Theme(
@@ -43,31 +84,23 @@ DARK = Theme(
     background="#0A0A0A",
     foreground="#FAFAFA",
     border="#2A2A2A",
-    primary="#FB923C",
+    primary="#FE670C",
+    secondary="#2563EB",
+    muted="#6B7280",
 )
 
-
-def index_to_color(index: int, total: int, theme: Theme) -> str:
-    """Evenly-spaced hue colors, solid and vibrant."""
-    hue = index / total
-    if theme.name == "dark":
-        sat, light = 0.30, 0.40
-    else:
-        sat, light = 0.35, 0.50
-    r, g, b = colorsys.hls_to_rgb(hue, light, sat)
-    return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
+CATEGORY_COLOR_ATTR: dict[str, str] = {
+    "cloud": "primary",
+    "hybrid": "secondary",
+    "oss": "muted",
+}
 
 
 def build_colors(names: list[str], theme: Theme) -> dict[str, str]:
-    """Primary for highlighted models, evenly-spaced hues for the rest."""
-    colors = {}
-    others = sorted([n for n in names if n not in HIGHLIGHT_MODELS])
-    for i, name in enumerate(others):
-        colors[name] = index_to_color(i, len(others), theme)
-    for name in names:
-        if name in HIGHLIGHT_MODELS:
-            colors[name] = theme.primary
-    return colors
+    """Color by category: primary for cloud, secondary for hybrid, muted for oss."""
+    return {
+        name: getattr(theme, CATEGORY_COLOR_ATTR[get_category(name)]) for name in names
+    }
 
 
 def load_results() -> dict[str, list[dict]]:
@@ -117,7 +150,7 @@ def bootstrap_ci(
 def apply_theme(ax, theme: Theme):
     ax.set_facecolor(theme.background)
     ax.figure.set_facecolor(theme.background)
-    ax.tick_params(colors=theme.foreground, which="both", labelsize=9)
+    ax.tick_params(colors=theme.foreground, which="both", labelsize=18)
     ax.xaxis.label.set_color(theme.foreground)
     ax.yaxis.label.set_color(theme.foreground)
     ax.title.set_color(theme.foreground)
@@ -130,8 +163,29 @@ def apply_theme(ax, theme: Theme):
     ax.set_axisbelow(True)
 
 
+def add_category_legend(ax, theme: Theme):
+    """Add a color-coded legend showing Cloud / OSS + Cloud LLM / Open Source."""
+    patches = [
+        mpatches.Patch(
+            color=getattr(theme, CATEGORY_COLOR_ATTR[cat]),
+            label=CATEGORY_LABELS[cat],
+        )
+        for cat in ["cloud", "hybrid", "oss"]
+    ]
+    legend = ax.legend(
+        handles=patches,
+        loc="upper right",
+        fontsize=18,
+        frameon=True,
+        facecolor=theme.background,
+        edgecolor=theme.border,
+        labelcolor=theme.foreground,
+    )
+    legend.get_frame().set_alpha(0.9)
+
+
 def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
-    """Bar chart with evenly-spaced hue colors. Highlighted models get primary."""
+    """Bar chart colored by category: cloud, hybrid, oss."""
     colors = build_colors(list(results.keys()), theme)
     data = []
     for model, runs in results.items():
@@ -142,6 +196,7 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
         data.append(
             {
                 "model": model,
+                "display": display_name(model),
                 "mean": mean * 100,
                 "err_lo": (mean - lo) * 100,
                 "err_hi": (hi - mean) * 100,
@@ -154,7 +209,7 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
 
     data.sort(key=lambda x: x["mean"], reverse=True)
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(18, 9))
     x = np.arange(len(data))
     err_color = "#666666" if theme.name == "light" else "#888888"
 
@@ -176,19 +231,25 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
             f"{d['mean']:.1f}%",
             ha="center",
             va="bottom",
-            fontsize=9,
+            fontsize=18,
             color=theme.foreground,
             fontweight="bold",
         )
 
     ax.set_xticks(x)
-    ax.set_xticklabels([d["model"] for d in data], rotation=35, ha="right", fontsize=9)
-    ax.set_ylabel("Score (%)", fontsize=10)
+    ax.set_xticklabels(
+        [wrap_label(d["display"]) for d in data],
+        rotation=0,
+        ha="center",
+        fontsize=14,
+    )
+    ax.set_ylabel("Score (%)", fontsize=20)
 
     vals = [d["mean"] for d in data]
-    ax.set_ylim(max(0, min(vals) - 10), max(vals) + 10)
+    ax.set_ylim(max(0, min(vals) - 7), max(vals) + 5)
 
     apply_theme(ax, theme)
+    add_category_legend(ax, theme)
     fig.tight_layout()
     ax.text(
         0.5,
@@ -197,7 +258,7 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
         transform=ax.transAxes,
         ha="center",
         va="top",
-        fontsize=16,
+        fontsize=28,
         color=theme.foreground,
     )
     fig.savefig(
@@ -209,7 +270,7 @@ def plot_accuracy_by_model(results: dict[str, list[dict]], theme: Theme):
 
 
 def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
-    """Scatter plot. Highlighted models in primary, others in hue colors. Labels on points."""
+    """Scatter plot colored by category with display names."""
     colors = build_colors(list(results.keys()), theme)
     data = []
     for model, runs in results.items():
@@ -219,11 +280,13 @@ def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
             continue
         acc_mean, acc_lo, acc_hi = bootstrap_ci(accs)
         tph_mean, tph_lo, tph_hi = bootstrap_ci(tph)
+        cat = get_category(model)
         data.append(
             {
                 "model": model,
+                "display": display_name(model),
                 "color": colors[model],
-                "highlight": model in HIGHLIGHT_MODELS,
+                "is_cloud": cat == "cloud",
                 "acc": acc_mean * 100,
                 "acc_lo": (acc_mean - acc_lo) * 100,
                 "acc_hi": (acc_hi - acc_mean) * 100,
@@ -237,14 +300,11 @@ def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
         return
 
     err_color = "#666666" if theme.name == "light" else "#888888"
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(18, 10))
 
-    legend_items = []
-
-    # Plot non-highlighted first, then highlighted on top
-    for d in sorted(data, key=lambda d: d["highlight"]):
-        size = 12 if d["highlight"] else 8
-        zorder = 10 if d["highlight"] else 5
+    for d in sorted(data, key=lambda d: d["is_cloud"]):
+        size = 18 if d["is_cloud"] else 12
+        zorder = 10 if d["is_cloud"] else 5
         ax.errorbar(
             d["tph"],
             d["acc"],
@@ -257,24 +317,23 @@ def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
             markersize=size,
             zorder=zorder,
         )
-        # Label next to point
         ax.annotate(
-            d["model"],
+            d["display"],
             (d["tph"], d["acc"]),
             textcoords="offset points",
-            xytext=(8, 4),
-            fontsize=8,
+            xytext=(10, 6),
+            fontsize=16,
             color=d["color"],
         )
-        legend_items.append((d["model"], d["color"]))
 
-    ax.set_xlabel("Tasks per Hour", fontsize=10)
-    ax.set_ylabel("Score (%)", fontsize=10)
+    ax.set_xlabel("Tasks per Hour", fontsize=20)
+    ax.set_ylabel("Score (%)", fontsize=20)
 
     accs = [d["acc"] for d in data]
     ax.set_ylim(max(0, min(accs) - 10), max(accs) + 10)
 
     apply_theme(ax, theme)
+    add_category_legend(ax, theme)
     fig.tight_layout()
     ax.text(
         0.5,
@@ -283,7 +342,7 @@ def plot_accuracy_vs_throughput(results: dict[str, list[dict]], theme: Theme):
         transform=ax.transAxes,
         ha="center",
         va="top",
-        fontsize=16,
+        fontsize=28,
         color=theme.foreground,
     )
     fig.savefig(
