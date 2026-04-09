@@ -21,7 +21,7 @@
 <img width="4 height="1" alt="">
 <a href="https://link.browser-use.com/discord"><img src="https://media.browser-use.tools/badges/discord" alt="Discord"></a>
 <img width="4" height="1" alt="">
-<a href="https://cloud.browser-use.com"><img src="https://media.browser-use.tools/badges/cloud" height="48" alt="Browser-Use Cloud"></a>
+<a href="https://cloud.browser-use.com?utm_source=github&utm_medium=benchmark_readme"><img src="https://media.browser-use.tools/badges/cloud" height="48" alt="Browser-Use Cloud"></a>
 </div>
 
 <h1 align="center">Open-Source Benchmarks</h1>
