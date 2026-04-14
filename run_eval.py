@@ -33,7 +33,7 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from browser_use import Agent, Browser, ChatGoogle
-from browser_use.llm import ChatBrowserUse
+from browser_use.llm import ChatBrowserUse, ChatOpenAI
 from browsers import PROVIDERS, get_provider
 from judge import construct_judge_messages, JudgementResult
 
@@ -47,7 +47,7 @@ TASK_TIMEOUT = 1800  # 30 minutes max per task
 
 AGENT_FRAMEWORK_NAME = "BrowserUse"
 AGENT_FRAMEWORK_VERSION = "0.11.5"
-MODEL_NAME = "bu-2-0"
+MODEL_NAME = os.getenv("MODEL_NAME", "bu-2-0")
 
 
 def encode_screenshots(paths: list[str]) -> list[str]:
@@ -219,6 +219,16 @@ async def main():
         help="Browser provider (default: browser-use-cloud)",
     )
     parser.add_argument(
+        "--model",
+        default=None,
+        help="Model id to use (e.g. bu-2-0 or gemma4:e2b). Can also be set via MODEL_NAME or OLLAMA_MODEL env var",
+    )
+    parser.add_argument(
+        "--base-url",
+        default=None,
+        help="Base URL for OpenAI-compatible APIs (e.g. http://localhost:11434 for Ollama). Can also be set via MODEL_BASE_URL or OLLAMA_URL env var",
+    )
+    parser.add_argument(
         "--tasks",
         type=int,
         default=None,
@@ -233,9 +243,23 @@ async def main():
     else:
         browser_provider = get_provider(browser_name)
 
-    # Build run key and paths
+    # Resolve model selection and build run key and paths
+    model_name = args.model or os.getenv("OLLAMA_MODEL") or MODEL_NAME
+    base_url = args.base_url or os.getenv("MODEL_BASE_URL") or os.getenv("OLLAMA_URL")
+
+    # If the model is one of the built-in bu-* models, use ChatBrowserUse.
+    # If a base_url is provided or the model looks like an Ollama id (contains ':'),
+    # use ChatOpenAI pointed at the `base_url` so Ollama (or other OpenAI-compatible
+    # endpoints) can be used.
+    if str(model_name).startswith("bu-"):
+        llm = ChatBrowserUse(model=model_name)
+    elif base_url or ":" in str(model_name):
+        llm = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
+    else:
+        llm = ChatBrowserUse(model=model_name)
+
     run_start = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_key = f"{AGENT_FRAMEWORK_NAME}_{AGENT_FRAMEWORK_VERSION}_browser_{browser_name}_model_{MODEL_NAME}"
+    run_key = f"{AGENT_FRAMEWORK_NAME}_{AGENT_FRAMEWORK_VERSION}_browser_{browser_name}_model_{model_name}"
     run_data_dir = (
         Path(__file__).parent / "run_data" / f"{run_key}_start_at_{run_start}"
     )
@@ -248,7 +272,7 @@ async def main():
     results = await asyncio.gather(
         *[
             run_task(
-                t, sem, browser_provider=browser_provider, run_data_dir=run_data_dir
+                t, sem, browser_provider=browser_provider, llm=llm, run_data_dir=run_data_dir
             )
             for t in tasks
         ]
