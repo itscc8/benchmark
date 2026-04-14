@@ -33,7 +33,7 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from browser_use import Agent, Browser, ChatGoogle
-from browser_use.llm import ChatBrowserUse, ChatOllama
+from browser_use.llm import ChatBrowserUse, ChatOpenAI
 from browsers import PROVIDERS, get_provider
 from judge import construct_judge_messages, JudgementResult
 
@@ -251,7 +251,12 @@ async def main():
     # If a base_url is provided or the model looks like an Ollama id (contains ':'),
     # use ChatOpenAI pointed at the `base_url` so Ollama (or other OpenAI-compatible
     # endpoints) can be used.
-    llm = ChatOllama(model=model_name)
+    if str(model_name).startswith("bu-"):
+        llm = ChatBrowserUse(model=model_name)
+    elif base_url or ":" in str(model_name):
+        llm = ChatOpenAI(model=model_name, api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
+    else:
+        llm = ChatBrowserUse(model=model_name)
 
     run_start = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_key = f"{AGENT_FRAMEWORK_NAME}_{AGENT_FRAMEWORK_VERSION}_browser_{browser_name}_model_{model_name}"
